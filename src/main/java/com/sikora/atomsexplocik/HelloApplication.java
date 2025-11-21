@@ -81,7 +81,7 @@ public class HelloApplication extends Application {
         primaryStage.show();
     }
 
-    /** Vykreslení celé mřížky */
+
     private void redrawBoard() {
         for (int r = 0; r < ROWS; r++) {
             for (int c = 0; c < COLS; c++) {
@@ -113,7 +113,7 @@ public class HelloApplication extends Application {
         }
     }
 
-    /** Aktualizace indikátoru hráče a zobrazení vítěze */
+
     private void updateStatus() {
         int winner = logic.getWinner();
         if (winner != 0) {
@@ -128,7 +128,7 @@ public class HelloApplication extends Application {
         }
     }
 
-    /** Restart hry */
+
     private void restartGame() {
         logic = new ExplodingAtomsLogic(ROWS, COLS); // reset logiky
         redrawBoard();

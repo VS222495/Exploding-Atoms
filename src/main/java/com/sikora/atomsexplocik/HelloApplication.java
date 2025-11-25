@@ -15,53 +15,63 @@ import javafx.stage.Stage;
 
 public class HelloApplication extends Application {
 
+
     private static final int ROWS = 6;
     private static final int COLS = 9;
     private static final int CELL_SIZE = 70;
 
-    private ExplodingAtomsLogic logic;
-    private StackPane[][] cellPanes;
 
-    private Circle currentPlayerIndicator;
-    private Label currentPlayerLabel;
+    private ExplodingAtomsLogic logic;
+
+
+    private StackPane[][] cells;
+
+
+    private Circle playerIndicator;
+    private Label playerLabel;
     private Button restartButton;
 
     @Override
-    public void start(Stage primaryStage) {
+    public void start(Stage stage) {
+
 
         logic = new ExplodingAtomsLogic(ROWS, COLS);
-        cellPanes = new StackPane[ROWS][COLS];
+        cells = new StackPane[ROWS][COLS];
+
 
         GridPane grid = new GridPane();
         grid.setAlignment(Pos.CENTER);
 
-         for (int r = 0; r < ROWS; r++) {
-            for (int c = 0; c < COLS; c++) {
+
+        for (int row = 0; row < ROWS; row++) {
+            for (int col = 0; col < COLS; col++) {
 
                 StackPane cell = new StackPane();
                 cell.setPrefSize(CELL_SIZE, CELL_SIZE);
-                cell.setStyle("-fx-border-color: grey; -fx-background-color: #eeeeee;");
-                cellPanes[r][c] = cell;
+                cell.setStyle("-fx-border-color: black; -fx-background-color: white;");
 
-                int row = r;
-                int col = c;
+                cells[row][col] = cell;
+
+                int r = row;
+                int c = col;
+
 
                 cell.setOnMouseClicked(e -> {
-                    logic.handleClick(row, col);
+                    logic.handleClick(r, c);
                     redrawBoard();
                     updateStatus();
                 });
 
-                grid.add(cell, c, r);
+                grid.add(cell, col, row);
             }
         }
 
 
-        currentPlayerIndicator = new Circle(12, Color.RED);
-        currentPlayerLabel = new Label("Hráč na tahu:");
-        currentPlayerLabel.setFont(Font.font(18));
+        playerIndicator = new Circle(12, Color.RED);
+        playerLabel = new Label("Hráč na tahu:");
+        playerLabel.setFont(Font.font(18));
 
-        HBox playerBox = new HBox(10, currentPlayerLabel, currentPlayerIndicator);
+        HBox playerBox = new HBox(10, playerLabel, playerIndicator);
         playerBox.setAlignment(Pos.CENTER);
 
 
@@ -69,42 +79,47 @@ public class HelloApplication extends Application {
         restartButton.setVisible(false);
         restartButton.setOnAction(e -> restartGame());
 
+
         VBox root = new VBox(10, playerBox, grid, restartButton);
         root.setAlignment(Pos.CENTER);
 
         redrawBoard();
         updateStatus();
 
-        Scene scene = new Scene(root, COLS * CELL_SIZE, ROWS * CELL_SIZE + 100);
-        primaryStage.setTitle("Exploding Atoms - JavaFX");
-        primaryStage.setScene(scene);
-        primaryStage.show();
+
+        Scene scene = new Scene(root, COLS * CELL_SIZE, ROWS * CELL_SIZE + 120);
+        stage.setTitle("Exploding Atoms - JavaFX");
+        stage.setScene(scene);
+        stage.show();
     }
 
 
     private void redrawBoard() {
         for (int r = 0; r < ROWS; r++) {
             for (int c = 0; c < COLS; c++) {
-                StackPane cell = cellPanes[r][c];
+
+                StackPane cell = cells[r][c];
                 cell.getChildren().clear();
 
                 int owner = logic.getOwner(r, c);
-                int atoms = logic.getAtoms(r, c);
+                int count = logic.getAtoms(r, c);
 
-                if (atoms == 0) continue;
+                if (count == 0) continue;
 
-                Color color = getColor(owner);
+                Color color = (owner == 1) ? Color.RED : Color.BLUE;
 
-                int count = Math.min(atoms, 3);
 
-                for (int i = 0; i < count; i++) {
+                int visible = Math.min(count, 3);
+
+                for (int i = 0; i < visible; i++) {
                     Circle circle = new Circle(10, color);
                     circle.setTranslateX((i - 1) * 12);
                     cell.getChildren().add(circle);
                 }
 
-                if (atoms > 3) {
-                    Label label = new Label("×" + atoms);
+
+                if (count > 3) {
+                    Label label = new Label("×" + count);
                     label.setFont(Font.font(22));
                     label.setTextFill(color);
                     cell.getChildren().add(label);
@@ -116,27 +131,24 @@ public class HelloApplication extends Application {
 
     private void updateStatus() {
         int winner = logic.getWinner();
+
         if (winner != 0) {
-            currentPlayerLabel.setText("Vyhrál hráč: " + (winner == 1 ? "Červený" : "Modrý"));
-            currentPlayerIndicator.setFill((winner == 1) ? Color.RED : Color.DODGERBLUE);
+            playerLabel.setText("Vyhrál hráč: " + (winner == 1 ? "Červený" : "Modrý"));
+            playerIndicator.setFill(winner == 1 ? Color.RED : Color.BLUE);
             restartButton.setVisible(true);
         } else {
             int player = logic.getCurrentPlayer();
-            currentPlayerLabel.setText("Hráč na tahu:");
-            currentPlayerIndicator.setFill((player == 1) ? Color.RED : Color.DODGERBLUE);
+            playerLabel.setText("Hráč na tahu:");
+            playerIndicator.setFill(player == 1 ? Color.RED : Color.BLUE);
             restartButton.setVisible(false);
         }
     }
 
 
     private void restartGame() {
-        logic = new ExplodingAtomsLogic(ROWS, COLS); // reset logiky
+        logic = new ExplodingAtomsLogic(ROWS, COLS);
         redrawBoard();
         updateStatus();
-    }
-
-    private Color getColor(int owner) {
-        return (owner == 1) ? Color.RED : Color.DODGERBLUE;
     }
 
     public static void main(String[] args) {

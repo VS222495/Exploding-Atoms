@@ -39,7 +39,7 @@ public class ExplodingAtomsLogic {
 
         addAtom(r, c, currentPlayer);
         totalMoves++;
-        currentPlayer = 3 - currentPlayer; // přepnutí hráče 1<->2
+        currentPlayer = 3 - currentPlayer;
     }
 
     private void addAtom(int r, int c, int player) {
@@ -94,7 +94,7 @@ public class ExplodingAtomsLogic {
         return 0;
     }
 
-    // --- Cell class ---
+
     private static class Cell {
         private int atoms = 0;
         private int owner = 0;
